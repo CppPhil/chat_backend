@@ -26,6 +26,19 @@ bool isAlive(const Poco::Net::StreamSocket& currentSocket)
   return it != gClients.end();
 }
 
+void cleanClients()
+{
+  for (std::size_t i{0}; i < gClients.size(); ++i) {
+    try {
+      gClients[i].peerAddress();
+    }
+    catch (...) {
+      gClients.erase(gClients.begin() + i);
+      --i;
+    }
+  }
+}
+
 class ClientHandler : public Poco::Net::TCPServerConnection {
 public:
   using TCPServerConnection::TCPServerConnection;
