@@ -36,8 +36,8 @@ public:
         [](const Poco::Net::StreamSocket& client) {
           return client.peerAddress().toString();
         });
-      const ClientListMessage clientListMessage{std::move(ipAddresses)};
-      const std::string       json{clientListMessage.asJson()};
+      const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
+      const std::string            json{clientListMessage.asJson()};
 
       for (Poco::Net::StreamSocket& client : gClients) {
         client.sendBytes(json.data(), json.size(), MSG_WAITALL);
@@ -56,8 +56,8 @@ void signalHandler(int signal)
 int main()
 {
   try {
-    const Poco::Net::IPAddress     ipAddress{ipAddress};
-    const Poco::Net::SocketAddress socketAddress{ipAddress, tcpPort};
+    const Poco::Net::IPAddress     ipAddress{std::string{lib::ipAddress}};
+    const Poco::Net::SocketAddress socketAddress{ipAddress, lib::tcpPort};
     const Poco::Net::ServerSocket  serverSocket{socketAddress};
     Poco::Net::TCPServer           tcpServer{
       Poco::Net::TCPServerConnectionFactory::Ptr{

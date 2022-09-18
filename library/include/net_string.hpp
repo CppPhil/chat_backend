@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 
+namespace lib {
 struct FromNetStringData {
 };
 
@@ -70,3 +71,4 @@ public:
 private:
   std::string m_string;
 };
+} // namespace lib

@@ -10,6 +10,7 @@
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Parser.h>
 
+namespace lib {
 class ClientListMessage {
 public:
   ClientListMessage(std::vector<std::string> ipAddresses)
@@ -54,3 +55,4 @@ public:
 private:
   std::vector<std::string> m_ipAddresses;
 };
+} // namespace lib
