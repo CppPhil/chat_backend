@@ -14,8 +14,8 @@
 #include "ip_address.hpp"
 #include "ports.hpp"
 
-std::vector<Poco::Net::StreamSocket> gClients{};
-std::mutex                           gClientsMutex{};
+std::vector<Poco::Net::StreamSocket*> gClients{};
+std::mutex                            gClientsMutex{};
 
 class ClientHandler : public Poco::Net::TCPServerConnection {
 public:
@@ -27,22 +27,26 @@ public:
       const Poco::Net::SocketAddress socketAddress{socket().peerAddress()};
       const std::string              address{socketAddress.toString()};
       std::lock_guard<std::mutex>    lock{gClientsMutex};
-      gClients.push_back(socket());
+      gClients.push_back(&socket());
       std::vector<std::string> ipAddresses(gClients.size(), std::string{});
       std::transform(
         gClients.begin(),
         gClients.end(),
         ipAddresses.begin(),
-        [](const Poco::Net::StreamSocket& client) {
-          return client.peerAddress().toString();
+        [](const Poco::Net::StreamSocket* client) {
+          return client->peerAddress().toString();
         });
       const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
       const std::string            json{clientListMessage.asJson()};
 
-      for (Poco::Net::StreamSocket& client : gClients) {
-        client.sendBytes(
-          json.data(), static_cast<int>(json.size()), MSG_WAITALL);
-      }
+      // TODO: Ain't makin' so sense
+      socket().sendBytes(
+        json.data(), static_cast<int>(json.size()), MSG_WAITALL);
+
+      // for (Poco::Net::StreamSocket* client : gClients) {
+      //   client->sendBytes(
+      //     json.data(), static_cast<int>(json.size()), MSG_WAITALL);
+      // }
     }
   }
 };
