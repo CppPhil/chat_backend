@@ -1,5 +1,12 @@
 {
   "files.associations": {
-    "mutex": "cpp"
+    "mutex": "cpp",
+    "deque": "cpp",
+    "forward_list": "cpp",
+    "list": "cpp",
+    "vector": "cpp",
+    "xhash": "cpp",
+    "xstring": "cpp",
+    "xtree": "cpp"
   }
 }

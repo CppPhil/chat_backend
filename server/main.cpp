@@ -15,6 +15,7 @@
 #include "ip_address.hpp"
 #include "ports.hpp"
 
+namespace srv {
 std::vector<Poco::Net::StreamSocket> gClients{};
 std::mutex                           gClientsMutex{};
 
@@ -30,7 +31,7 @@ void cleanClients()
 {
   for (std::size_t i{0}; i < gClients.size(); ++i) {
     try {
-      gClients[i].peerAddress();
+      gClients[i].sendBytes("", 1);
     }
     catch (...) {
       gClients.erase(gClients.begin() + i);
@@ -50,6 +51,7 @@ public:
 
     {
       std::lock_guard<std::mutex> lock{gClientsMutex};
+      cleanClients();
       gClients.push_back(socket());
       std::vector<std::string> ipAddresses(gClients.size(), std::string{});
       std::transform(
@@ -62,19 +64,20 @@ public:
       const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
       const std::string            json{clientListMessage.asJson()};
 
-      for (std::size_t i{0}; i < gClients.size(); ++i) {
-        Poco::Net::StreamSocket& client{gClients[i]};
-        try {
-          client.sendBytes(json.data(), static_cast<int>(json.size()));
-        }
-        catch (const Poco::Net::ConnectionResetException& exception) {
-          gClients.erase(gClients.begin() + i);
-          --i;
+      for (Poco::Net::StreamSocket& client : gClients) {
+        const int bytesToSend{static_cast<int>(json.size())};
+        const int bytesSent{client.sendBytes(json.data(), bytesToSend)};
+
+        if (bytesSent != bytesToSend) {
+          std::cerr << "Sent " << bytesSent << " bytes, but should've sent "
+                    << bytesToSend << " bytes.\n";
         }
       }
     }
 
     while (isAlive(socket())) {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(10ms);
     }
   }
 };
@@ -85,6 +88,7 @@ void signalHandler(int signal)
 {
   gSignalState = signal;
 }
+} // namespace srv
 
 int main()
 {
@@ -94,16 +98,16 @@ int main()
     const Poco::Net::ServerSocket  serverSocket{socketAddress};
     Poco::Net::TCPServer           tcpServer{
       Poco::Net::TCPServerConnectionFactory::Ptr{
-        new Poco::Net::TCPServerConnectionFactoryImpl<ClientHandler>{}},
+        new Poco::Net::TCPServerConnectionFactoryImpl<srv::ClientHandler>{}},
       serverSocket};
     tcpServer.start();
 
-    std::signal(SIGINT, &signalHandler);
+    std::signal(SIGINT, &srv::signalHandler);
     std::cout << "Hit CTRL+C to exit.\n";
 
-    while (gSignalState != SIGINT) {
+    while (srv::gSignalState != SIGINT) {
       using namespace std::chrono_literals;
-      std::this_thread::sleep_for(100ms);
+      std::this_thread::sleep_for(10ms);
     }
 
     tcpServer.stop();
