@@ -23,10 +23,10 @@ public:
 
   void run() override
   {
-    for (;;) {
-      const Poco::Net::SocketAddress socketAddress{socket().peerAddress()};
-      const std::string              address{socketAddress.toString()};
-      std::lock_guard<std::mutex>    lock{gClientsMutex};
+    const Poco::Net::SocketAddress socketAddress{socket().peerAddress()};
+    const std::string              address{socketAddress.toString()};
+    {
+      std::lock_guard<std::mutex> lock{gClientsMutex};
       gClients.push_back(&socket());
       std::vector<std::string> ipAddresses(gClients.size(), std::string{});
       std::transform(
@@ -39,14 +39,17 @@ public:
       const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
       const std::string            json{clientListMessage.asJson()};
 
-      // TODO: Ain't makin' so sense
-      socket().sendBytes(
-        json.data(), static_cast<int>(json.size()), MSG_WAITALL);
+      for (Poco::Net::StreamSocket* client : gClients) {
+        try {
+          client->sendBytes(json.data(), static_cast<int>(json.size()));
+        }
+        catch (const Poco::Net::ConnectionResetException& exception) {
+          // TODO: HERE
+        }
+      }
+    }
 
-      // for (Poco::Net::StreamSocket* client : gClients) {
-      //   client->sendBytes(
-      //     json.data(), static_cast<int>(json.size()), MSG_WAITALL);
-      // }
+    for (;;) {
     }
   }
 };
