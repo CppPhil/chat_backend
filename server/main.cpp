@@ -40,7 +40,8 @@ public:
       const std::string            json{clientListMessage.asJson()};
 
       for (Poco::Net::StreamSocket& client : gClients) {
-        client.sendBytes(json.data(), json.size(), MSG_WAITALL);
+        client.sendBytes(
+          json.data(), static_cast<int>(json.size()), MSG_WAITALL);
       }
     }
   }
