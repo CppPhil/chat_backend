@@ -1,0 +1,11 @@
+server listens on TCP port 50000
+clients will connect to that
+ whenever a client connects the server will send it a ClientListMessage
+
+clients listen on UDP port 50000
+ and receive ChatMessages
+
+ClientListMessage = json array of IP addresses
+ChatMessage = string
+
+All strings are Netstrings: https://en.wikipedia.org/wiki/Netstring
