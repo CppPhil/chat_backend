@@ -1,24 +1,22 @@
-#include <cstdlib>
 #include <csignal>
+#include <cstdlib>
 
 #include <iostream>
-#include <vector>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include <Poco/Net/NetException.h>
-#include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/TCPServer.h>
 
 #include "ip_address.hpp"
 #include "ports.hpp"
 
 std::vector<Poco::Net::StreamSocket> gClients{};
-std::mutex gClientsMutex{};
+std::mutex                           gClientsMutex{};
 
-class ClientHandler 
-  : public Poco::Net::TCPServerConnection
-{
+class ClientHandler : public Poco::Net::TCPServerConnection {
 public:
   using TCPServerConnection::TCPServerConnection;
 
@@ -26,13 +24,13 @@ public:
   {
     for (;;) {
       const Poco::Net::SocketAddress socketAddress{socket().peerAddress()};
-      const std::string address{socketAddress.toString()};
-      std::lock_guard<std::mutex> lock{gClientsMutex};
+      const std::string              address{socketAddress.toString()};
+      std::lock_guard<std::mutex>    lock{gClientsMutex};
 
       for (Poco::Net::StreamSocket& client : gClients) {
         // TODO: Send the ClientListMessage
       }
-    
+
       gClients.push_back(socket());
     }
   }
@@ -66,7 +64,8 @@ int main()
     }
 
     tcpServer.stop();
-  } catch (const Poco::Net::NetException& exception) {
+  }
+  catch (const Poco::Net::NetException& exception) {
     std::cerr << "Server caught NetException: " << exception.what() << '\n';
     return EXIT_FAILURE;
   }
