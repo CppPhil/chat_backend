@@ -10,6 +10,7 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/TCPServer.h>
 
+#include "client_list_message.hpp"
 #include "ip_address.hpp"
 #include "ports.hpp"
 
@@ -26,12 +27,21 @@ public:
       const Poco::Net::SocketAddress socketAddress{socket().peerAddress()};
       const std::string              address{socketAddress.toString()};
       std::lock_guard<std::mutex>    lock{gClientsMutex};
+      gClients.push_back(socket());
+      std::vector<std::string> ipAddresses(gClients.size(), std::string{});
+      std::transform(
+        gClients.begin(),
+        gClients.end(),
+        ipAddresses.begin(),
+        [](const Poco::Net::StreamSocket& client) {
+          return client.peerAddress().toString();
+        });
+      const ClientListMessage clientListMessage{std::move(ipAddresses)};
+      const std::string       json{clientListMessage.asJson()};
 
       for (Poco::Net::StreamSocket& client : gClients) {
-        // TODO: Send the ClientListMessage
+        client.sendBytes(json.data(), json.size(), MSG_WAITALL);
       }
-
-      gClients.push_back(socket());
     }
   }
 };
