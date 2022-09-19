@@ -1,10 +1,13 @@
-#include <algorithm>
+#include <cstddef>
 
 #include <fmt/format.h>
 
 #include <Poco/Net/NetException.h>
 
+#include <pl/algo/ranged_algorithms.hpp>
+
 #include "lib/client_list_message.hpp"
+#include "lib/contains.hpp"
 #include "lib/net_string.hpp"
 
 #include "clients.hpp"
@@ -17,6 +20,11 @@ std::string createNetString(std::vector<std::string>&& ipAddresses)
     lib::ClientListMessage{std::move(ipAddresses)}.asJson()};
   return lib::NetString{lib::FromPlainString{}, json.data(), json.size()}
     .asNetString();
+}
+
+std::string hostAddressOf(const Poco::Net::StreamSocket& socket)
+{
+  return socket.peerAddress().host().toString();
 }
 } // anonymous namespace
 
@@ -42,8 +50,7 @@ void Clients::add(const Poco::Net::StreamSocket& socket)
     const int bytesSent{socket.sendBytes(toSend.data(), bytesToSend)};
 
     if (bytesSent == bytesToSend) {
-      fmt::print(
-        "Sent \"{}\" to {}\n", toSend, socket.peerAddress().host().toString());
+      fmt::print("Sent \"{}\" to {}\n", toSend, hostAddressOf(socket));
     }
     else {
       fmt::print(
@@ -58,16 +65,15 @@ void Clients::add(const Poco::Net::StreamSocket& socket)
 bool Clients::isAlive(const Poco::Net::StreamSocket& socket) const
 {
   std::lock_guard<std::mutex> lock{m_mutex};
-  return std::find(m_sockets.begin(), m_sockets.end(), socket)
-         != m_sockets.end();
+  return lib::contains(m_sockets, socket);
 }
 
 void Clients::clean()
 {
   for (std::size_t i{0}; i < m_sockets.size(); ++i) {
     try {
-      // Send 0x00 byte
-      m_sockets[i].sendBytes("", 1);
+      constexpr std::byte nullByte{0};
+      m_sockets[i].sendBytes(&nullByte, sizeof(nullByte));
     }
     catch (const Poco::Net::NetException& exception) {
       fmt::print(
@@ -94,13 +100,7 @@ void Clients::disconnect()
 std::vector<std::string> Clients::createIpAddressesVector()
 {
   std::vector<std::string> ipAddresses(m_sockets.size(), std::string{});
-  std::transform(
-    m_sockets.begin(),
-    m_sockets.end(),
-    ipAddresses.begin(),
-    [](const Poco::Net::StreamSocket& socket) {
-      return socket.peerAddress().host().toString();
-    });
+  pl::algo::transform(m_sockets, ipAddresses.begin(), &hostAddressOf);
   return ipAddresses;
 }
 } // namespace srv
