@@ -43,21 +43,31 @@ void Clients::add(const Poco::Net::StreamSocket& socket)
 
   clean();
   m_sockets.push_back(socket);
-  const std::string toSend{createNetString(createIpAddressesVector())};
 
-  for (Poco::Net::StreamSocket& socket : m_sockets) {
-    const int bytesToSend{static_cast<int>(toSend.size())};
-    const int bytesSent{socket.sendBytes(toSend.data(), bytesToSend)};
+  for (std::size_t i{0}; i < m_sockets.size(); ++i) {
+    try {
+      Poco::Net::StreamSocket& socket{m_sockets[i]};
+      const std::string toSend{createNetString(createIpAddressesVector())};
+      const int         bytesToSend{static_cast<int>(toSend.size())};
+      const int         bytesSent{socket.sendBytes(toSend.data(), bytesToSend)};
 
-    if (bytesSent == bytesToSend) {
-      fmt::print("Sent \"{}\" to {}\n", toSend, hostAddressOf(socket));
+      if (bytesSent == bytesToSend) {
+        fmt::print("Sent \"{}\" to {}\n", toSend, hostAddressOf(socket));
+      }
+      else {
+        fmt::print(
+          stderr,
+          "Sent {} bytes, but should've sent {} bytes.\n",
+          bytesSent,
+          bytesToSend);
+      }
     }
-    else {
+    catch (const std::exception& exception) {
+      m_sockets.erase(m_sockets.begin() + i);
+      --i;
       fmt::print(
-        stderr,
-        "Sent {} bytes, but should've sent {} bytes.\n",
-        bytesSent,
-        bytesToSend);
+        "Erased client socket, couldn't send data to it: \"{}\".\n",
+        exception.what());
     }
   }
 }
