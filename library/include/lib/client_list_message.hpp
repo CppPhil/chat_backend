@@ -57,6 +57,11 @@ public:
     return oss.str();
   }
 
+  const std::vector<std::string>& ipAddresses() const noexcept
+  {
+    return m_ipAddreses;
+  }
+
 private:
   std::vector<std::string> m_ipAddresses;
 };
