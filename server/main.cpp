@@ -1,11 +1,13 @@
 #include <csignal>
+#include <cstdio>
 #include <cstdlib>
 
 #include <algorithm>
-#include <iostream>
 #include <mutex>
 #include <string>
 #include <vector>
+
+#include <fmt/format.h>
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
@@ -34,7 +36,10 @@ void cleanClients()
     try {
       gClients[i].sendBytes("", 1);
     }
-    catch (...) {
+    catch (const Poco::Net::NetException& netException) {
+      fmt::print(
+        "Couldn't send null-terminator to client: \"{}\", removing client.\n",
+        netException.what());
       gClients.erase(gClients.begin() + i);
       --i;
     }
@@ -60,7 +65,7 @@ public:
         gClients.end(),
         ipAddresses.begin(),
         [](const Poco::Net::StreamSocket& client) {
-          return client.peerAddress().toString();
+          return client.peerAddress().host().toString();
         });
       const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
       const std::string            json{clientListMessage.asJson()};
@@ -72,9 +77,18 @@ public:
         const int bytesToSend{static_cast<int>(toSend.size())};
         const int bytesSent{client.sendBytes(toSend.data(), bytesToSend)};
 
-        if (bytesSent != bytesToSend) {
-          std::cerr << "Sent " << bytesSent << " bytes, but should've sent "
-                    << bytesToSend << " bytes.\n";
+        if (bytesSent == bytesToSend) {
+          fmt::print(
+            "Sent \"{}\" to {}\n",
+            toSend,
+            client.peerAddress().host().toString());
+        }
+        else {
+          fmt::print(
+            stderr,
+            "Sent {} bytes, but should've sent {} bytes.\n",
+            bytesSent,
+            bytesToSend);
         }
       }
     }
@@ -107,7 +121,7 @@ int main()
     tcpServer.start();
 
     std::signal(SIGINT, &srv::signalHandler);
-    std::cout << "Hit CTRL+C to exit.\n";
+    fmt::print("Hit CTRL+C to exit.\n");
 
     while (srv::gSignalState != SIGINT) {
       using namespace std::chrono_literals;
@@ -117,7 +131,7 @@ int main()
     tcpServer.stop();
   }
   catch (const Poco::Net::NetException& exception) {
-    std::cerr << "Server caught NetException: " << exception.what() << '\n';
+    fmt::print(stderr, "Server caught NetException: {}\n", exception.what());
     return EXIT_FAILURE;
   }
 

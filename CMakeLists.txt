@@ -23,6 +23,7 @@ set(ENABLE_ACTIVERECORD OFF CACHE BOOL "Enable ActiveRecord" FORCE)
 set(ENABLE_ACTIVERECORD_COMPILER OFF CACHE BOOL "Enable ActiveRecord Compiler" FORCE)
 
 add_subdirectory(external/poco)
+add_subdirectory(external/fmt)
 
 add_subdirectory(library)
 add_subdirectory(server)

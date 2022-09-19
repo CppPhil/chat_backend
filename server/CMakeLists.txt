@@ -1,4 +1,4 @@
 add_executable(server main.cpp)
 
-target_link_libraries(server PRIVATE library)
+target_link_libraries(server PRIVATE library fmt::fmt)
 
