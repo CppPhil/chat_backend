@@ -9,6 +9,16 @@
 #include "net_string.hpp"
 
 namespace srv {
+namespace {
+std::string createNetString(std::vector<std::string>&& ipAddresses)
+{
+  const std::string json{
+    lib::ClientListMessage{std::move(ipAddresses)}.asJson()};
+  return lib::NetString{lib::FromPlainString{}, json.data(), json.size()}
+    .asNetString();
+}
+} // anonymous namespace
+
 Clients::Clients() : m_mutex{}, m_padding{}, m_sockets{}
 {
 }
@@ -24,19 +34,7 @@ void Clients::add(const Poco::Net::StreamSocket& socket)
 
   clean();
   m_sockets.push_back(socket);
-  std::vector<std::string> ipAddresses(m_sockets.size(), std::string{});
-  std::transform(
-    m_sockets.begin(),
-    m_sockets.end(),
-    ipAddresses.begin(),
-    [](const Poco::Net::StreamSocket& socket) {
-      return socket.peerAddress().host().toString();
-    });
-  const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
-  const std::string            json{clientListMessage.asJson()};
-  const lib::NetString         netString{
-    lib::FromPlainString{}, json.data(), json.size()};
-  const std::string toSend{netString.asNetString()};
+  const std::string toSend{createNetString(createIpAddressesVector())};
 
   for (Poco::Net::StreamSocket& socket : m_sockets) {
     const int bytesToSend{static_cast<int>(toSend.size())};
@@ -90,5 +88,18 @@ void Clients::disconnect()
 
   // None of the sockets shall be 'alive'.
   m_sockets.clear();
+}
+
+std::vector<std::string> Clients::createIpAddressesVector()
+{
+  std::vector<std::string> ipAddresses(m_sockets.size(), std::string{});
+  std::transform(
+    m_sockets.begin(),
+    m_sockets.end(),
+    ipAddresses.begin(),
+    [](const Poco::Net::StreamSocket& socket) {
+      return socket.peerAddress().host().toString();
+    });
+  return ipAddresses;
 }
 } // namespace srv

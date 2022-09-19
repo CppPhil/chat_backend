@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <new>
+#include <string>
 #include <vector>
 
 #include <Poco/Net/StreamSocket.h>
@@ -25,6 +26,8 @@ private:
   void clean();
 
   void disconnect();
+
+  std::vector<std::string> createIpAddressesVector();
 
   mutable std::mutex m_mutex;
   unsigned char      m_padding[std::hardware_destructive_interference_size];
