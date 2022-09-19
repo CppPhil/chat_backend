@@ -12,7 +12,6 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/TCPServer.h>
 
-#include "lib/ip_address.hpp"
 #include "lib/ports.hpp"
 
 #include "clients.hpp"
@@ -44,10 +43,27 @@ void signalHandler(int signal)
 }
 } // namespace srv
 
-int main()
+int main(int argc, char* argv[])
 {
+  constexpr int expectedArgc{2};
+  constexpr int ipAddressIndex{1};
+
+  if (argc != expectedArgc) {
+    fmt::print(
+      stderr,
+      "Invalid command line argument count.\n"
+      "Got {} command line arguments, but expected {}!\n"
+      "\n"
+      "Example:\n"
+      "{} 192.168.178.24\n",
+      argc,
+      expectedArgc,
+      argv[0]);
+    return EXIT_FAILURE;
+  }
+
   try {
-    const Poco::Net::IPAddress     ipAddress{std::string{lib::ipAddress}};
+    const Poco::Net::IPAddress     ipAddress{std::string{argv[ipAddressIndex]}};
     const Poco::Net::SocketAddress socketAddress{ipAddress, lib::tcpPort};
     const Poco::Net::ServerSocket  serverSocket{socketAddress};
     Poco::Net::TCPServer           tcpServer{
