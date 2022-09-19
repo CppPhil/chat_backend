@@ -1,4 +1,4 @@
-include(GoogleTest)
+include(CTest)
 
 add_executable(
   unit_tests
@@ -10,10 +10,14 @@ add_executable(
 target_link_libraries(
   unit_tests
   PRIVATE
-  gtest
   library)
 
-gtest_discover_tests(
+target_include_directories(
   unit_tests
-  WORKING_DIRECTORY
-  ${CMAKE_CURRENT_SOURCE_DIR})
+  PRIVATE
+  ${backend_SOURCE_DIR}/external/doctest/doctest)
+
+add_test(
+  NAME unit_tests
+  COMMAND $<TARGET_FILE:unit_tests>)
+

@@ -10,3 +10,6 @@
 [submodule "external/gsl"]
 	path = external/gsl
 	url = https://github.com/microsoft/GSL.git
+[submodule "external/doctest"]
+	path = external/doctest
+	url = https://github.com/doctest/doctest.git

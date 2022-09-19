@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <gtest/gtest.h>
+#include <doctest.h>
 
 #include "lib/net_string.hpp"
 
@@ -12,44 +12,44 @@ static lib::NetString parseNetString(const std::string& string)
 
 using namespace std::string_literals;
 
-TEST(NetString, shouldParseValidNetString)
+TEST_CASE("NetString, shouldParseValidNetString")
 {
   const std::string    string{"15:This is a text.,"};
   const lib::NetString netString{parseNetString(string)};
-  EXPECT_EQ("This is a text."s, netString.asPlainString());
-  EXPECT_EQ(string, netString.asNetString());
+  CHECK_EQ("This is a text."s, netString.asPlainString());
+  CHECK_EQ(string, netString.asNetString());
 }
 
-TEST(NetString, shouldParseOneElementNetString)
+TEST_CASE("NetString, shouldParseOneElementNetString")
 {
   const std::string    string{"1:A,"};
   const lib::NetString netString{parseNetString(string)};
-  EXPECT_EQ("A"s, netString.asPlainString());
-  EXPECT_EQ(string, netString.asNetString());
+  CHECK_EQ("A"s, netString.asPlainString());
+  CHECK_EQ(string, netString.asNetString());
 }
 
-TEST(NetString, shouldFailToParseStringWithoutColon)
+TEST_CASE("NetString, shouldFailToParseStringWithoutColon")
 {
   const std::string string{"5Hello,"};
-  EXPECT_THROW(parseNetString(string), std::runtime_error);
+  CHECK_THROWS_AS(parseNetString(string), std::runtime_error);
 }
 
-TEST(NetString, shouldFailToParseStringWithInvalidSize)
+TEST_CASE("NetString, shouldFailToParseStringWithInvalidSize")
 {
   const std::string string{"oueuoeiu:Test,"};
-  EXPECT_THROW(parseNetString(string), std::runtime_error);
+  CHECK_THROWS_AS(parseNetString(string), std::runtime_error);
 }
 
-TEST(NetString, shouldFailToParseStringWithIncorrectSize)
+TEST_CASE("NetString, shouldFailToParseStringWithIncorrectSize")
 {
   const std::string string1{"28:This is a very lengthy string,"};
   const std::string string2{"50:This is a very short string,"};
-  EXPECT_THROW(parseNetString(string1), std::runtime_error);
-  EXPECT_THROW(parseNetString(string2), std::runtime_error);
+  CHECK_THROWS_AS(parseNetString(string1), std::runtime_error);
+  CHECK_THROWS_AS(parseNetString(string2), std::runtime_error);
 }
 
-TEST(NetString, shouldFailToParseStringWithoutComma)
+TEST_CASE("NetString, shouldFailToParseStringWithoutComma")
 {
   const std::string string{"5:Hello"};
-  EXPECT_THROW(parseNetString(string), std::runtime_error);
+  CHECK_THROWS_AS(parseNetString(string), std::runtime_error);
 }
