@@ -4,9 +4,10 @@
 
 #include <Poco/Net/NetException.h>
 
-#include "client_list_message.hpp"
+#include "lib/client_list_message.hpp"
+#include "lib/net_string.hpp"
+
 #include "clients.hpp"
-#include "net_string.hpp"
 
 namespace srv {
 namespace {

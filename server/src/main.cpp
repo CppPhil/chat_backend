@@ -10,9 +10,10 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/TCPServer.h>
 
+#include "lib/ip_address.hpp"
+#include "lib/ports.hpp"
+
 #include "clients.hpp"
-#include "ip_address.hpp"
-#include "ports.hpp"
 
 namespace srv {
 std::unique_ptr<Clients> gClients{std::make_unique<Clients>()};
