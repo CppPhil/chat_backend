@@ -75,7 +75,7 @@ void Clients::clean()
       constexpr std::byte nullByte{0};
       m_sockets[i].sendBytes(&nullByte, sizeof(nullByte));
     }
-    catch (const Poco::Net::NetException& exception) {
+    catch (const std::exception& exception) {
       fmt::print(
         "Couldn't send null-terminator to client: \"{}\", removing client.\n",
         exception.what());
