@@ -5,7 +5,7 @@
 			"name": "Debug Launch",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}\\build\\server\\Debug\\server.exe",
+			"program": "${workspaceFolder}\\build\\test\\Debug\\unit_tests.exe",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",

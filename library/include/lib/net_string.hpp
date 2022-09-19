@@ -42,7 +42,7 @@ public:
       throw std::runtime_error{"NetString is malformatted"};
     }
 
-    if ((colon + size) != (end - 1)) {
+    if (((colon + 1) + size) != (end - 1)) {
       throw std::runtime_error{"NetString is malformatted"};
     }
 

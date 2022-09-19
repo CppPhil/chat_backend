@@ -14,17 +14,9 @@ using namespace std::string_literals;
 
 TEST(NetString, shouldParseValidNetString)
 {
-  const std::string    string{"16:This is a text.,"};
+  const std::string    string{"15:This is a text.,"};
   const lib::NetString netString{parseNetString(string)};
   EXPECT_EQ("This is a text."s, netString.asPlainString());
-  EXPECT_EQ(string, netString.asNetString());
-}
-
-TEST(NetString, shouldParseEmptyNetString)
-{
-  const std::string    string{"0:,"};
-  const lib::NetString netString{parseNetString(string)};
-  EXPECT_EQ(""s, netString.asPlainString());
   EXPECT_EQ(string, netString.asNetString());
 }
 
@@ -50,7 +42,7 @@ TEST(NetString, shouldFailToParseStringWithInvalidSize)
 
 TEST(NetString, shouldFailToParseStringWithIncorrectSize)
 {
-  const std::string string1{"29:This is a very lengthy string,"};
+  const std::string string1{"28:This is a very lengthy string,"};
   const std::string string2{"50:This is a very short string,"};
   EXPECT_THROW(parseNetString(string1), std::runtime_error);
   EXPECT_THROW(parseNetString(string2), std::runtime_error);
