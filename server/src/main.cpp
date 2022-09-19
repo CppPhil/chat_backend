@@ -5,6 +5,8 @@
 #include <memory>
 #include <thread>
 
+#include <gsl/util>
+
 #include <fmt/format.h>
 
 #include <Poco/Net/NetException.h>
@@ -56,6 +58,10 @@ int main()
 
     std::signal(SIGINT, &srv::signalHandler);
     fmt::print("Hit CTRL+C to exit.\n");
+    auto scopeGuard{gsl::finally([&tcpServer] {
+      srv::gClients = nullptr;
+      tcpServer.stop();
+    })};
 
     while (srv::gSignalState != SIGINT) {
       using namespace std::chrono_literals;
@@ -63,10 +69,6 @@ int main()
     }
 
     fmt::print("Got CTRL+C, exiting.\n");
-
-    // TODO: Final Act
-    srv::gClients = nullptr;
-    tcpServer.stop();
   }
   catch (const Poco::Net::NetException& exception) {
     fmt::print(stderr, "Server caught NetException: {}\n", exception.what());

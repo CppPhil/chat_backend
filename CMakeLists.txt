@@ -24,6 +24,7 @@ set(ENABLE_ACTIVERECORD_COMPILER OFF CACHE BOOL "Enable ActiveRecord Compiler" F
 
 add_subdirectory(external/poco)
 add_subdirectory(external/fmt)
+add_subdirectory(external/gsl)
 add_subdirectory(external/philslib)
 
 add_subdirectory(library)
