@@ -1,3 +1,6 @@
 [submodule "external/poco"]
 	path = external/poco
 	url = https://github.com/pocoproject/poco.git
+[submodule "external/fmt"]
+	path = external/fmt
+	url = https://github.com/fmtlib/fmt.git
