@@ -10,4 +10,5 @@ target_link_libraries(
   INTERFACE
   Poco::Net
   Poco::JSON
+  Poco::Foundation
   CppPhil::philslib)

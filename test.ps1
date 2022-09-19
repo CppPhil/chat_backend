@@ -7,13 +7,10 @@ if (-Not (Test-Path -Path $build_dir)) {
 
 Set-Location $build_dir
 
-$threads = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
-
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-cmake --build . --config Debug -j $threads
+ctest --verbose .
 
 if (-Not ($LASTEXITCODE -eq "0")) {
-  Write-Output "cmake --build for Debug mode failed!"
+  Write-Output "ctest failed!"
   Pop-Location
   exit 1
 }

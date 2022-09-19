@@ -11,5 +11,6 @@ format() {
 
 format "$DIR/library"
 format "$DIR/server"
+format "$DIR/test"
 exit 0
 

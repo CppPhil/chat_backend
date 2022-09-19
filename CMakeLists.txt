@@ -2,10 +2,22 @@
 
 project(backend)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if (WIN32)
+  foreach (MODE "_DEBUG" "_MINSIZEREL" "_RELEASE" "_RELWITHDEBINFO")
+    string(REPLACE "/MD" "/MT" TMP "${CMAKE_C_FLAGS${MODE}}")
+    set(CMAKE_C_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+    string(REPLACE "/MD" "/MT" TMP "${CMAKE_CXX_FLAGS${MODE}}")
+    set(CMAKE_CXX_FLAGS${MODE} "${TMP}" CACHE STRING "" FORCE)
+  endforeach()
+endif()
+
+set(POCO_MT ON CACHE BOOL "Build with MT" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
 set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings" FORCE)
 set(ENABLE_XML OFF CACHE BOOL "Enable XML" FORCE)
@@ -25,8 +37,9 @@ set(ENABLE_ACTIVERECORD_COMPILER OFF CACHE BOOL "Enable ActiveRecord Compiler" F
 add_subdirectory(external/poco)
 add_subdirectory(external/fmt)
 add_subdirectory(external/gsl)
+add_subdirectory(external/googletest)
 add_subdirectory(external/philslib)
 
 add_subdirectory(library)
 add_subdirectory(server)
-
+add_subdirectory(test)
