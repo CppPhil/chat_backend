@@ -18,6 +18,6 @@ target_include_directories(
   ${backend_SOURCE_DIR}/external/doctest/doctest)
 
 add_test(
-  NAME unit_tests
-  COMMAND $<TARGET_FILE:unit_tests>)
+  the_unit_tests
+  unit_tests)
 
