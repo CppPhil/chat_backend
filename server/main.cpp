@@ -22,6 +22,17 @@ namespace srv {
 std::vector<Poco::Net::StreamSocket> gClients{};
 std::mutex                           gClientsMutex{};
 
+void disconnect()
+{
+  std::lock_guard<std::mutex> lock{gClientsMutex};
+
+  for (Poco::Net::StreamSocket& socket : gClients) {
+    socket.shutdown();
+  }
+
+  gClients.clear();
+}
+
 bool isAlive(const Poco::Net::StreamSocket& currentSocket)
 {
   std::lock_guard<std::mutex> lock{gClientsMutex};
@@ -128,6 +139,8 @@ int main()
       std::this_thread::sleep_for(10ms);
     }
 
+    fmt::print("Got CTRL+C, exiting.\n");
+    srv::disconnect();
     tcpServer.stop();
   }
   catch (const Poco::Net::NetException& exception) {
