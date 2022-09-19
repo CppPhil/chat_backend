@@ -18,6 +18,11 @@ public:
   {
   }
 
+  /*!
+   * \brief Creates a `ClientListMessage` from JSON.
+   * \param json The JSON to parse as a `ClientListMessage`.
+   * \throws std::runtime_error if parsing fails.
+   **/
   ClientListMessage(const std::string& json) : m_ipAddresses{}
   {
     try {

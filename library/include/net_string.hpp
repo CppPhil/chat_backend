@@ -15,6 +15,12 @@ struct FromPlainString {
 
 class NetString {
 public:
+  /*!
+   * \brief Creates a `NetString` from net string data.
+   * \param data The address of the beginning of a net string encoded string.
+   * \param bytes The size of the memory region referred to by `data` in bytes.
+   * \throws std::runtime_error if parsing the net string fails.
+   **/
   NetString(FromNetStringData, const void* data, std::size_t bytes) : m_string{}
   {
     const char* const begin{static_cast<const char*>(data)};

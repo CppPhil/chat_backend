@@ -1,3 +1,2 @@
 Handle exceptions.
-Add namespaces.
 Use fmtlib

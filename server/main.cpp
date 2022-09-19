@@ -13,6 +13,7 @@
 
 #include "client_list_message.hpp"
 #include "ip_address.hpp"
+#include "net_string.hpp"
 #include "ports.hpp"
 
 namespace srv {
@@ -63,10 +64,13 @@ public:
         });
       const lib::ClientListMessage clientListMessage{std::move(ipAddresses)};
       const std::string            json{clientListMessage.asJson()};
+      const lib::NetString         netString{
+        lib::FromPlainString{}, json.data(), json.size()};
+      const std::string toSend{netString.asNetString()};
 
       for (Poco::Net::StreamSocket& client : gClients) {
-        const int bytesToSend{static_cast<int>(json.size())};
-        const int bytesSent{client.sendBytes(json.data(), bytesToSend)};
+        const int bytesToSend{static_cast<int>(toSend.size())};
+        const int bytesSent{client.sendBytes(toSend.data(), bytesToSend)};
 
         if (bytesSent != bytesToSend) {
           std::cerr << "Sent " << bytesSent << " bytes, but should've sent "
