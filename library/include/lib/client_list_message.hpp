@@ -59,7 +59,7 @@ public:
 
   const std::vector<std::string>& ipAddresses() const noexcept
   {
-    return m_ipAddreses;
+    return m_ipAddresses;
   }
 
 private:
