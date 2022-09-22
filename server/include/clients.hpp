@@ -23,8 +23,6 @@ public:
   bool isAlive(const Poco::Net::StreamSocket& socket) const;
 
 private:
-  void clean();
-
   void disconnect();
 
   std::vector<std::string> createIpAddressesVector();

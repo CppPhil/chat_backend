@@ -41,7 +41,6 @@ void Clients::add(const Poco::Net::StreamSocket& socket)
 {
   std::lock_guard<std::mutex> lock{m_mutex};
 
-  clean();
   m_sockets.push_back(socket);
 
   for (std::size_t i{0}; i < m_sockets.size(); ++i) {
@@ -76,23 +75,6 @@ bool Clients::isAlive(const Poco::Net::StreamSocket& socket) const
 {
   std::lock_guard<std::mutex> lock{m_mutex};
   return lib::contains(m_sockets, socket);
-}
-
-void Clients::clean()
-{
-  for (std::size_t i{0}; i < m_sockets.size(); ++i) {
-    try {
-      constexpr std::byte nullByte{0};
-      m_sockets[i].sendBytes(&nullByte, sizeof(nullByte));
-    }
-    catch (const std::exception& exception) {
-      fmt::print(
-        "Couldn't send null-terminator to client: \"{}\", removing client.\n",
-        exception.what());
-      m_sockets.erase(m_sockets.begin() + i);
-      --i;
-    }
-  }
 }
 
 void Clients::disconnect()
